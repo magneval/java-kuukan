@@ -4,6 +4,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.BloomFilter;
 import com.jme3.scene.Geometry;
@@ -28,15 +29,15 @@ public class Kuukan extends SimpleApplication {
         material.setColor("Color", ColorRGBA.White);
         material.setColor("GlowColor", ColorRGBA.White);
 
-        IntStream.range(0, 1000).forEach(i -> {
+        IntStream.range(0, 3000).forEach(i -> {
             Geometry geometry = new Geometry("sphere" + i, sphere);
             geometry.setMaterial(material);
-            geometry.setLocalTranslation(mt.nextFloat(), mt.nextFloat(), mt.nextFloat());
+            geometry.setLocalTranslation(generatePseudoRandomPosition(6, 10));
             rootNode.attachChild(geometry);
         });
 
         BitmapText text = new BitmapText(guiFont);
-        text.setText("Pseudorandom cubic galaxy");
+        text.setText("Awesome rotating galaxy !");
         text.setLocalTranslation(0, settings.getHeight(), 0);
 
         guiNode.attachChild(text);
@@ -44,6 +45,24 @@ public class Kuukan extends SimpleApplication {
         FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
         fpp.addFilter(new BloomFilter(BloomFilter.GlowMode.Objects));
         viewPort.addProcessor(fpp);
+    }
+
+    @Override
+    public void simpleUpdate(float tpf) {
+        rootNode.rotate(0, tpf / 10, 0);
+    }
+
+    private Vector3f generatePseudoRandomPosition(int maxRadius, int flatteningRatio) {
+        double radialDistance = mt.nextDouble() * maxRadius;
+        double azimuthalAngle = mt.nextDouble() * 2 * Math.PI;
+        double polarAngle = mt.nextDouble() * Math.PI;
+
+        double y = radialDistance * Math.cos(polarAngle);
+        double projection = radialDistance * Math.sin(polarAngle);
+        double x = projection * Math.cos(azimuthalAngle);
+        double z = projection * Math.sin(azimuthalAngle);
+
+        return new Vector3f((float) x, (float) y / flatteningRatio, (float) z);
     }
 
 }
